@@ -1,0 +1,132 @@
+---
+- debug: var=ansible_os_family
+# Variable setup.
+- name: Include OS-specific variables.
+  include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Ensure local root ca folder exists.
+  file: 
+    path: "{{ ownca_root_ca_folder }}"
+    state: directory
+
+- name: Copy root ca cert
+  no_log: true
+  copy:
+    dest: "{{ ownca_root_ca_cert_filename }}"
+    content: |
+      {{ ownca_root_ca_certificate }}
+  delegate_to: localhost
+
+- name: Copy root ca key
+  no_log: true
+  copy:
+    dest: "{{ ownca_root_ca_key_filename }}"
+    content: |
+      {{ ownca_root_ca_key }}
+  delegate_to: localhost
+
+- block:
+    - name: Check if group exists
+      getent:
+        database: group
+        key: "{{ ownca_dest_ssl_group }}"
+      register: r_check_group
+      ignore_errors: true
+    - debug: var=r_check_group
+    - name: Create group
+      group:
+        name: "{{ ownca_dest_ssl_group }}"
+        state: present
+        system: true
+      when: r_check_group.failed
+
+    - name: Check if user exists
+      getent:
+        database: passwd
+        key: "{{ ownca_dest_ssl_user }}"
+      register: r_check_user
+      ignore_errors: true
+
+    - name: Create user
+      user:
+        name: "{{ ownca_dest_ssl_user }}"
+        groups: "{{ ownca_dest_ssl_group }}"
+        append: true
+        shell: /usr/sbin/nologin
+        system: true
+        create_home: false
+        home: /
+      when: r_check_user.failed
+
+    - name: Ensure ssl dir exists
+      file: 
+          path: "{{ ownca_dest_ssl_folder }}"
+          owner: "{{ ownca_dest_ssl_user }}"
+          group: "{{ ownca_dest_ssl_group }}"
+          mode: "{{ ownca_dest_ssl_mode }}"
+          state: directory
+
+    - name: Generate private key
+      openssl_privatekey:
+        path: "{{ ownca_dest_ssl_folder }}/{{ inventory_hostname_short }}.key"
+        owner: "{{ ownca_dest_ssl_user }}"
+        mode: "{{ ownca_dest_ssl_key_mode }}"
+        group: "{{ ownca_dest_ssl_group }}"
+    - name: Create hostname folder for certs
+      file: 
+          path: "{{ ownca_root_ca_folder }}/{{ inventory_hostname_short }}"
+          state: directory
+
+    - name: Pull private key
+      fetch: 
+        src: "{{ ownca_dest_ssl_folder }}/{{ inventory_hostname_short }}.key"
+        dest: "{{ ownca_root_ca_folder }}/{{ inventory_hostname_short }}/{{ inventory_hostname_short }}.key"
+        flat: true
+
+    - name: Generate CSR
+      openssl_csr:
+        path: "{{ ownca_dest_ssl_folder }}/{{ inventory_hostname_short }}.csr"
+        privatekey_path: "{{ ownca_dest_ssl_folder }}/{{ inventory_hostname_short }}.key"
+        country_name: DE
+        organization_name: "T-Systems MMS"
+        common_name: "{{ inventory_hostname_short }}.local"
+        subject_alt_name: "{{ ownca_subject_alt_name }}"
+        owner: "{{ ownca_dest_ssl_user }}"
+        group: "{{ ownca_dest_ssl_group }}"
+
+    - name: Pull CSR
+      become: true
+      fetch: 
+        src: "{{ ownca_dest_ssl_folder }}/{{ inventory_hostname_short }}.csr"
+        dest: "{{ ownca_root_ca_folder }}/{{ inventory_hostname_short }}/{{ inventory_hostname_short }}.csr"
+        flat: true
+
+    - name: Sign CSR with CA key
+      become: false
+      connection: local
+      delegate_to: localhost
+      openssl_certificate:
+        path: "{{ ownca_root_ca_folder }}/{{ inventory_hostname_short }}/{{ inventory_hostname_short }}.crt"
+        csr_path: "{{ ownca_root_ca_folder }}/{{ inventory_hostname_short }}/{{ inventory_hostname_short }}.csr"
+        ownca_path: "{{ ownca_root_ca_cert_filename }}"
+        ownca_privatekey_path: "{{ ownca_root_ca_key_filename }}"
+        ownca_privatekey_passphrase: test
+        provider: ownca
+
+    - name: Push certificate
+      become: true
+      copy:
+        src: "{{ ownca_root_ca_folder }}/{{ inventory_hostname_short }}/{{ inventory_hostname_short }}.crt"
+        dest: "{{ ownca_dest_ssl_folder }}/{{ inventory_hostname_short }}.crt"
+        owner: "{{ ownca_dest_ssl_user }}"
+        group: "{{ ownca_dest_ssl_group }}"
+
+    - name: Push CA
+      become: true
+      copy: 
+        src: "{{ ownca_root_ca_cert_filename }}"
+        dest: "{{ _ownca_ca_cert_path }}/{{ ownca_dest_root_ca_filename }}"
+
+    - name: Update CA Trust
+      become: true
+      command: "{{ _ownca_ca_cert_update_cmd }}"

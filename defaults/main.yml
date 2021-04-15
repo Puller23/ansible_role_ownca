@@ -1,0 +1,13 @@
+---
+ownca_root_ca_folder: "/home/myuser/myownca"
+ownca_root_ca_cert_filename: "{{ ownca_root_ca_folder }}/root-ca.crt"
+ownca_root_ca_key_filename: "{{ ownca_root_ca_folder }}/root-ca.key"
+ownca_root_ca_passphrase: ""
+ownca_dest_ssl_folder: ""
+ownca_dest_ssl_user: "root"
+ownca_dest_ssl_group: "root"
+ownca_dest_ssl_mode: 0770
+ownca_dest_ssl_key_mode: 0600
+ownca_dest_root_ca_filename: "root-ca.crt"
+
+ownca_subject_alt_name: "example.com"

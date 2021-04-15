@@ -1,0 +1,3 @@
+---
+_ownca_ca_cert_path: "/usr/local/share/ca-certificates"
+_ownca_ca_cert_update_cmd: "update-ca-certificates"
