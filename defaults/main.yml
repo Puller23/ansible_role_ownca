@@ -9,5 +9,5 @@ ownca_dest_ssl_group: "root"
 ownca_dest_ssl_mode: 0770
 ownca_dest_ssl_key_mode: 0600
 ownca_dest_root_ca_filename: "root-ca.crt"
-
 ownca_subject_alt_name: "example.com"
+ownca_dest_file_id: "{{ inventory_hostname_short }}"

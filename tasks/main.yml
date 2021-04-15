@@ -8,6 +8,7 @@
   file: 
     path: "{{ ownca_root_ca_folder }}"
     state: directory
+  delegate_to: localhost
 
 - name: Copy root ca cert
   no_log: true
@@ -33,6 +34,7 @@
       register: r_check_group
       ignore_errors: true
     - debug: var=r_check_group
+
     - name: Create group
       group:
         name: "{{ ownca_dest_ssl_group }}"
@@ -68,28 +70,29 @@
 
     - name: Generate private key
       openssl_privatekey:
-        path: "{{ ownca_dest_ssl_folder }}/{{ inventory_hostname_short }}.key"
+        path: "{{ ownca_dest_ssl_folder }}/{{ ownca_dest_file_id }}.key"
         owner: "{{ ownca_dest_ssl_user }}"
         mode: "{{ ownca_dest_ssl_key_mode }}"
         group: "{{ ownca_dest_ssl_group }}"
+
     - name: Create hostname folder for certs
       file: 
-          path: "{{ ownca_root_ca_folder }}/{{ inventory_hostname_short }}"
+          path: "{{ ownca_root_ca_folder }}/{{ ownca_dest_file_id }}"
           state: directory
 
     - name: Pull private key
       fetch: 
-        src: "{{ ownca_dest_ssl_folder }}/{{ inventory_hostname_short }}.key"
-        dest: "{{ ownca_root_ca_folder }}/{{ inventory_hostname_short }}/{{ inventory_hostname_short }}.key"
+        src: "{{ ownca_dest_ssl_folder }}/{{ ownca_dest_file_id }}.key"
+        dest: "{{ ownca_root_ca_folder }}/{{ ownca_dest_file_id }}/{{ ownca_dest_file_id }}.key"
         flat: true
 
     - name: Generate CSR
       openssl_csr:
-        path: "{{ ownca_dest_ssl_folder }}/{{ inventory_hostname_short }}.csr"
-        privatekey_path: "{{ ownca_dest_ssl_folder }}/{{ inventory_hostname_short }}.key"
+        path: "{{ ownca_dest_ssl_folder }}/{{ ownca_dest_file_id }}.csr"
+        privatekey_path: "{{ ownca_dest_ssl_folder }}/{{ ownca_dest_file_id }}.key"
         country_name: DE
         organization_name: "T-Systems MMS"
-        common_name: "{{ inventory_hostname_short }}.local"
+        common_name: "{{ ownca_dest_file_id }}.local"
         subject_alt_name: "{{ ownca_subject_alt_name }}"
         owner: "{{ ownca_dest_ssl_user }}"
         group: "{{ ownca_dest_ssl_group }}"
@@ -97,8 +100,8 @@
     - name: Pull CSR
       become: true
       fetch: 
-        src: "{{ ownca_dest_ssl_folder }}/{{ inventory_hostname_short }}.csr"
-        dest: "{{ ownca_root_ca_folder }}/{{ inventory_hostname_short }}/{{ inventory_hostname_short }}.csr"
+        src: "{{ ownca_dest_ssl_folder }}/{{ ownca_dest_file_id }}.csr"
+        dest: "{{ ownca_root_ca_folder }}/{{ ownca_dest_file_id }}/{{ ownca_dest_file_id }}.csr"
         flat: true
 
     - name: Sign CSR with CA key
@@ -106,8 +109,8 @@
       connection: local
       delegate_to: localhost
       openssl_certificate:
-        path: "{{ ownca_root_ca_folder }}/{{ inventory_hostname_short }}/{{ inventory_hostname_short }}.crt"
-        csr_path: "{{ ownca_root_ca_folder }}/{{ inventory_hostname_short }}/{{ inventory_hostname_short }}.csr"
+        path: "{{ ownca_root_ca_folder }}/{{ ownca_dest_file_id }}/{{ ownca_dest_file_id }}.crt"
+        csr_path: "{{ ownca_root_ca_folder }}/{{ ownca_dest_file_id }}/{{ ownca_dest_file_id }}.csr"
         ownca_path: "{{ ownca_root_ca_cert_filename }}"
         ownca_privatekey_path: "{{ ownca_root_ca_key_filename }}"
         ownca_privatekey_passphrase: test
@@ -116,8 +119,8 @@
     - name: Push certificate
       become: true
       copy:
-        src: "{{ ownca_root_ca_folder }}/{{ inventory_hostname_short }}/{{ inventory_hostname_short }}.crt"
-        dest: "{{ ownca_dest_ssl_folder }}/{{ inventory_hostname_short }}.crt"
+        src: "{{ ownca_root_ca_folder }}/{{ ownca_dest_file_id }}/{{ ownca_dest_file_id }}.crt"
+        dest: "{{ ownca_dest_ssl_folder }}/{{ ownca_dest_file_id }}.crt"
         owner: "{{ ownca_dest_ssl_user }}"
         group: "{{ ownca_dest_ssl_group }}"
 
