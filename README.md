@@ -9,6 +9,7 @@ Requirements
 
 You need to create manually a certificate authority that will be used to sign the certificates of all hosts. 
 
+    $ openssl genrsa -aes256 -out ca-key.pem 2048
     $ openssl req -x509 -new -nodes -extensions v3_ca -key ca-key.pem -days 1095 -out ca-root.pem -sha512
 
 Role Variables
