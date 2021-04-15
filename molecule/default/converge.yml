@@ -1,7 +1,66 @@
 ---
 - name: Converge
   hosts: all
-  become: true
+  vars:
+    ownca_root_ca_folder: "/tmp/myownca"
+    ownca_subject_alt_name: "DNS:MyServer.local,DNS:localhost,IP:172.16.1.41,IP:127.0.0.1"
+    ownca_root_ca_passphrase: "test"
+    ownca_dest_ssl_folder: "/etc/ssl/internal_ca/"
+    ownca_root_ca_key: |
+      -----BEGIN ENCRYPTED PRIVATE KEY-----
+      MIIFHDBOBgkqhkiG9w0BBQ0wQTApBgkqhkiG9w0BBQwwHAQImXTIWKxiHkUCAggA
+      MAwGCCqGSIb3DQIJBQAwFAYIKoZIhvcNAwcECAQ8EoCtXCD8BIIEyC7XzY/3t7eO
+      dhkAei8Axtig+hR5wcYOiISiVtRdXXRnx6pUmK0fS+hIfBGlrgY2vDAZ7VaWTKn3
+      MgTGKHs3jGjDjdtT19gzorgoQxIILg45EUGgCdpT7fJScVSZ9xibpeOLyQLRcqyh
+      IjVL7TPMfGace8pHn0zk92n41r9c6c4fXo2wljLj/TKhDMwBblEGRXpOXXOlF9KD
+      w8/3yCm0KGRd0X/J75f8Kg4Vlka00Lx1eHgi/CvKAv6PXA41Y6og150LjKlqbSAn
+      UiKfMGItUfrIYee5+Q5vUCZ5Z+RlUB82b0aBXFItHmuotWYzUuIrUdr5K5KAZlCf
+      u1WxnZVx5DrQk3htKGVf4Oq0hSj6sWbhwht7Ytd7P7noNFkY9Upql4Zemmz+GiiH
+      sNud3VvIcUfVlNhrwxbiLbr2MRV1l/vkT0XZF92Zjm/jhWBfduKohN6kUclCVQiD
+      ffFA20kJbl4x8aP5Qls9spl+y/6f944daoMDQVSuVkVJW2vrIMsf9PAP9dAN+YaG
+      vQ80sNeSW9/le5Vsuwdr5BWdxZZYsdtkY/9KX3CQChZtT2Z7NfeLDrwiKSiTaJ3r
+      t4NSRd5pgaihr7evABMW2mZ5T9jpGz2Q76TqRLyacxLKLmi7WijENKKjLipYo/3s
+      ttiMVTnJhYxe2VhZYL/lsWNa5fV7HhdoIgszBkuoi6Bg6LylDUIHxFk4niekN/zz
+      TqPoYA8ZEpmUMaGuTCBOQvbQsj5rNX4a5hc7aPvKAuhMFk6QzlVYGx43Le3nXMVJ
+      TXrZanEKMlBKao44H6/WdsoHQZG+hy//45zdxHTFOUZ+RnJ1Kok+HE8A3RWXWFVV
+      3/bPEkf7dykzBNSaZWcQfPCn0gKgnre/VWC04TZX2Amgs5my7Qqo4QLkyT4wi+/p
+      TRtYKkdiva545UoCmrTM85UQHoARMyEVHLI9JR/IuqzKEytXhGH+A78TuzRItQMi
+      9I9+GDtO1TH5Yoi7iF4mGfYutlqo163yJAdfC+4SMqVKKv/Bl3QI+ZlY2y4q7Y/Y
+      Ysd4YmYVNKkBgPtU2CnbD1IxBpD0o5AzsBZQAs6HvX4ZnSkC0/IsLgADOnHmAqbM
+      QWiT/Emk+Lt+RE63sGfVJAK/jxm9JFy35AH70wXObK2KHEGVpQ9ZKCXKYheklB+x
+      ECxFm1p0ctM0TWa35q6pFGoeVY2Z0O8bkhLGaPc6q0aa7mYU8ljku1Ihij5LA1l8
+      8MZeA/jKZf4oi5AtQ6k1R1SP3fnBrovTr2R0q1fVhBCqlWWkluF85FqkvVFR1ThI
+      eKyniGd5JFcQiUrXYX97ne28gBz9PAgrbJsqXCw4P5TQFX5r+rxIEsccsNRS71aH
+      F2LwlWiJmGq4XYAWn4RGdRd1hi5OPFQFrbWRKNa6ZMrlUajBBRYAsmX50re6f7b+
+      Ln9LiELi0um5N5uZkIJPMJRSzlQPx8A84RHon7Oh2PhSdDD+Ui1kW5H1/uDQn1/l
+      +8ZWlh+ntA2JakiKbleLYNOGN/j4Hq6AMs/kBOoudob0CRAu3Xx3E+x4rCiaLdUD
+      KmNquH0BZeK1M+zQAMIUVomh7E3fah2UnQ7ri5CwMu1Gc+Ioo2EJazZ/w4lLOIbL
+      Pmzbo9Ph0OE2BC3L+gMlBA==
+      -----END ENCRYPTED PRIVATE KEY-----
+
+    ownca_root_ca_certificate: |
+      -----BEGIN CERTIFICATE-----
+      MIIDlTCCAn2gAwIBAgIUG26H4uPjpGmjzIqSWpX7lLovuaIwDQYJKoZIhvcNAQEL
+      BQAwWjELMAkGA1UEBhMCREUxDzANBgNVBAgMBlNheG9ueTEQMA4GA1UEBwwHRHJl
+      c2RlbjEMMAoGA1UECgwDTU1TMQwwCgYDVQQLDANBT0MxDDAKBgNVBAMMA2VsazAe
+      Fw0yMTAzMTIwOTIyMjJaFw0yNjAzMTEwOTIyMjJaMFoxCzAJBgNVBAYTAkRFMQ8w
+      DQYDVQQIDAZTYXhvbnkxEDAOBgNVBAcMB0RyZXNkZW4xDDAKBgNVBAoMA01NUzEM
+      MAoGA1UECwwDQU9DMQwwCgYDVQQDDANlbGswggEiMA0GCSqGSIb3DQEBAQUAA4IB
+      DwAwggEKAoIBAQDQEodWOlS3wHhiiu7+PT4Eea5VmFGyUKI2uB0OsMH7a3u7fSok
+      t17sKkzSLdTTm9nDFNJz893SBqhHMayn35SNPJyBE4iyPAhvNq/+VG9IOZhKWfk+
+      qvsGZU/4C618ktkaadRbXCeYIDgYTBmbpVdSPafOLH/3FSbPxdYKUAe8ah6v7Ft5
+      S5Fiq6V87STx2SdxXZsHQPK/hbLDuB+Pab9ZnEYBwx9uu4WCzoMKOJ+iosW9rh0Y
+      bdKJLsDRBNFjywX5EIg61qC46wKHHvpSmOVzKmQETAJOyM4NrdTbNAM9oBGUMrlX
+      XZGo3lNeqHU44K1Vm+kU4Ni7dLLJHj+E5TWPAgMBAAGjUzBRMB0GA1UdDgQWBBQP
+      lxOjaMYOrpOMBQjRr5JG88DeIDAfBgNVHSMEGDAWgBQPlxOjaMYOrpOMBQjRr5JG
+      88DeIDAPBgNVHRMBAf8EBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQCWdKFeAcNk
+      sfJNhE9Mypnjttviv83I80yZjjeiLZDb0hAcdPm+jaWotFrUizlU2W0GrZ14ylz2
+      5MQBr3h4WGeDaPKlfYlzpA8fUjhsSH1p4dvuk60Gk+rBgMey3u1jjglEho+x6Mh5
+      /gHsMEB/LTCIvEKtz2D3gX/UIzn6aUolIYoJaqwDoqXQooXjZG7oqE206WoJ+p+F
+      uL0jb+xrqzh0mLmj6MsgxS4S/vr/lcXJ2JSq9CSuafTKbuI6uZxae/gtZp21APF3
+      3FaCD+0YeiCSVzi7/oeBEQwAVZql0/6nRvhYDm833ESh23L7L9oAZB1qD1mGRO5j
+      bt0lXVcyHx3L
+      -----END CERTIFICATE-----
 
   pre_tasks:
     - name: Update apt cache.
@@ -10,4 +69,4 @@
       changed_when: false
 
   roles:
-    - role: puller23.clamav
+    - role: puller23.ownca
