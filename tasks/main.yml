@@ -123,12 +123,20 @@
         owner: "{{ ownca_dest_ssl_user }}"
         group: "{{ ownca_dest_ssl_group }}"
 
-    - name: Push CA
+    - name: Push CA root
+      become: true
+      copy:
+        src: "{{ ownca_root_ca_cert_filename }}"
+        dest: "{{ ownca_dest_ssl_folder }}/{{ ownca_dest_root_ca_filename }}"
+        owner: "{{ ownca_dest_ssl_user }}"
+        group: "{{ ownca_dest_ssl_group }}"
+
+    - name: Push CA to system dir
       become: true
       copy: 
         src: "{{ ownca_root_ca_cert_filename }}"
         dest: "{{ _ownca_ca_cert_path }}/{{ ownca_dest_root_ca_filename }}"
 
-    - name: Update CA Trust
+    - name: Update CA Trust from system dir
       become: true
       command: "{{ _ownca_ca_cert_update_cmd }}"
