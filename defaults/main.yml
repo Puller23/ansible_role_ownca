@@ -1,5 +1,5 @@
 ---
-ownca_root_ca_folder: "/home/myuser/myownca"
+ownca_root_ca_folder: "{{ lookup('env','HOME') }}/myownca"
 ownca_root_ca_cert_filename: "{{ ownca_root_ca_folder }}/root-ca.crt"
 ownca_root_ca_key_filename: "{{ ownca_root_ca_folder }}/root-ca.key"
 ownca_root_ca_passphrase: ""

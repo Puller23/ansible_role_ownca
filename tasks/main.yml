@@ -112,7 +112,7 @@
         csr_path: "{{ ownca_root_ca_folder }}/{{ ownca_dest_file_id }}/{{ ownca_dest_file_id }}.csr"
         ownca_path: "{{ ownca_root_ca_cert_filename }}"
         ownca_privatekey_path: "{{ ownca_root_ca_key_filename }}"
-        ownca_privatekey_passphrase: test
+        ownca_privatekey_passphrase: "{{ ownca_root_ca_passphrase }}"
         provider: ownca
 
     - name: Push certificate
