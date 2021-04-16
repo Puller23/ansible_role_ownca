@@ -10,7 +10,7 @@
   delegate_to: localhost
 
 - name: Copy root ca cert
-  #no_log: true
+  no_log: true
   copy:
     dest: "{{ ownca_root_ca_cert_filename }}"
     content: |
@@ -18,7 +18,7 @@
   delegate_to: localhost
 
 - name: Copy root ca key
-  #no_log: true
+  no_log: true
   copy:
     dest: "{{ ownca_root_ca_key_filename }}"
     content: |

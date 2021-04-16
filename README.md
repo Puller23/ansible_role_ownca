@@ -1,6 +1,8 @@
 Ansible Role: ownca
 =========
 
+[![CI](https://github.com/Puller23/ansible_role_clamav/actions/workflows/ci.yml/badge.svg)](https://github.com/Puller23/ansible_role_clamav/actions/workflows/ci.yml)
+
 This role creates certificate from an existing selfsigned authority and deploy this certificates to the Server.
 The certificates will be generated on the destination hosts, signed on the Ansile host, and then uploaded again to the destination hosts.
 
